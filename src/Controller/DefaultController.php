@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Form\EditProductFormType;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,13 +16,12 @@ use Symfony\Config\Framework\RequestConfig;
 
 class DefaultController extends AbstractController
 {
-    #[Route('/', name: 'homepage')]
+    #[Route('/', name: 'main_homepage')]
     public function index(ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
         $productList = $entityManager->getRepository(Product::class)->findAll();
 
-        dd($productList);
         return $this->render('main/default/index.html.twig', []);
     }
 
@@ -35,10 +37,17 @@ class DefaultController extends AbstractController
             $product = new Product();
         }
 
-        $form = $this->createFormBuilder($product)
-            ->add('title', TextType::class)
-            ->getForm();
-        dd($product, $form);
-        return $this->render('main/default/edit_product.html.twig', []);
+        $form = $this->createForm(EditProductFormType::class, $product);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('product_edit', ['id' => $product->getId()]);
+        }
+
+        return $this->render('main/default/edit_product.html.twig', ['form' => $form->createView()]);
     }
 }

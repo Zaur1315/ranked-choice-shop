@@ -9,13 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->isPublished = false;
-        $this->isDeleted = false;
-    }
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -41,6 +34,13 @@ class Product
 
     #[ORM\Column]
     private ?bool $isDeleted = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+//        $this->isPublished = false;
+//        $this->isDeleted = false;
+    }
 
     public function getId(): ?int
     {
@@ -112,7 +112,7 @@ class Product
         return $this->isPublished;
     }
 
-    public function setPublished(bool $isPublished): static
+    public function setPublished(bool $isPublished = false): static
     {
         $this->isPublished = $isPublished;
 
@@ -124,7 +124,7 @@ class Product
         return $this->isDeleted;
     }
 
-    public function setDeleted(bool $isDeleted): static
+    public function setDeleted(bool $isDeleted = false): static
     {
         $this->isDeleted = $isDeleted;
 
